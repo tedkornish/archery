@@ -1,4 +1,9 @@
+module Main exposing (..)
+
 import Html exposing (..)
+import Physics exposing (Object, tick)
+
+
 --import Html.Attributes exposing (..)
 --import Html.Events exposing (onClick)
 
@@ -18,12 +23,18 @@ main =
 
 
 type alias Model =
-    {}
+    { objects : List Object }
 
 
 initialModel : Model
 initialModel =
-    {}
+    { objects =
+        [ { pos = { x = 10, y = 10 }
+          , vel = { x = 1, y = 1 }
+          , accel = { x = 0, y = -1 }
+          }
+        ]
+    }
 
 
 init : ( Model, Cmd Msg )
@@ -41,9 +52,7 @@ type Msg
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case msg of
-        NoOp ->
-            ( model, Cmd.none )
+    ( { model | objects = List.map tick model.objects }, Cmd.none )
 
 
 
@@ -62,6 +71,4 @@ subscriptions model =
 view : Model -> Html Msg
 view model =
     div []
-        [ text "Hello, world!"
-        , text (toString model)
-        ]
+        [ text "Hello, world!" ]
