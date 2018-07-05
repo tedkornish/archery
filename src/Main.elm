@@ -2,6 +2,7 @@ module Main exposing (..)
 
 import Html exposing (..)
 import Physics exposing (Object, tick)
+import Time exposing (Time, second)
 
 
 --import Html.Attributes exposing (..)
@@ -47,12 +48,14 @@ init =
 
 
 type Msg
-    = NoOp
+    = Tick Time
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    ( { model | objects = List.map tick model.objects }, Cmd.none )
+    case msg of
+        Tick _ ->
+            ( { model | objects = List.map tick model.objects }, Cmd.none )
 
 
 
@@ -61,7 +64,7 @@ update msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    Time.every second Tick
 
 
 
