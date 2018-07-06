@@ -75,7 +75,9 @@ type Msg
 
 inBounds : Window.Size -> Object -> Bool
 inBounds size obj =
-    (obj.pos.x < (toFloat size.width)) && (obj.pos.y < (toFloat size.height))
+    (obj.pos.x > 0)
+        && (obj.pos.x < (toFloat size.width))
+        && (obj.pos.y < (toFloat size.height))
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
