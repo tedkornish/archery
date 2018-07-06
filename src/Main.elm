@@ -86,10 +86,14 @@ update msg model =
             ( { model | dragStart = Just pos }, Cmd.none )
 
         MouseUp pos ->
-            if model.mousePosition == model.dragStart then
-                ( { model | objects = (newObjectAt pos) :: model.objects }, Cmd.none )
-            else
-                ( { model | dragStart = Nothing }, Cmd.none )
+            let
+                objects =
+                    if model.mousePosition == model.dragStart then
+                        (newObjectAt pos) :: model.objects
+                    else
+                        model.objects
+            in
+                ( { model | dragStart = Nothing, objects = objects }, Cmd.none )
 
         MouseMove pos ->
             ( { model | mousePosition = Just pos }, Cmd.none )
