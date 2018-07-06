@@ -26,7 +26,7 @@ main =
 
 
 type alias Model =
-    { objects : List Object }
+    { objects : List Object, mousePosition : Maybe Position }
 
 
 newObjectAt : Position -> Object
@@ -40,7 +40,8 @@ newObjectAt pos =
 
 initialModel : Model
 initialModel =
-    { objects =
+    { mousePosition = Nothing
+    , objects =
         [ { pos = { x = 0, y = 0 }
           , vel = { x = 12, y = -1 }
           , accel = { x = 0, y = 0.6 }
@@ -69,6 +70,7 @@ type Msg
     | Click Position
     | DragStart Position
     | DragEnd Position
+    | MouseMove Position
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -85,6 +87,9 @@ update msg model =
 
         DragEnd pos ->
             ( { model | objects = (newObjectAt pos) :: model.objects }, Cmd.none )
+
+        MouseMove pos ->
+            ( { model | mousePosition = Just pos }, Cmd.none )
 
 
 
@@ -112,6 +117,16 @@ viewObjects obj =
         []
 
 
+getMousePositionString : Maybe Position -> String
+getMousePositionString pos =
+    case pos of
+        Nothing ->
+            "(none)"
+
+        Just { x, y } ->
+            "(" ++ toString x ++ "," ++ toString y ++ ")"
+
+
 view : Model -> Html Msg
 view model =
     svg
@@ -120,5 +135,12 @@ view model =
         , on "click" (mouseEventDecoder (\coords -> Click coords))
         , on "mousedown" (mouseEventDecoder (\coords -> DragStart coords))
         , on "mouseup" (mouseEventDecoder (\coords -> DragEnd coords))
+        , on "mousemove" (mouseEventDecoder (\coords -> MouseMove coords))
         ]
-        (List.map viewObjects model.objects)
+        (List.append
+            (List.map viewObjects model.objects)
+            [ Svg.text_
+                [ x "20", y "30" ]
+                [ getMousePositionString model.mousePosition |> Svg.text ]
+            ]
+        )
