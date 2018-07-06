@@ -71,7 +71,6 @@ init =
 
 type Msg
     = Tick Time
-    | Click Position
     | DragStart Position
     | DragEnd Position
     | MouseMove Position
@@ -83,14 +82,14 @@ update msg model =
         Tick _ ->
             ( { model | objects = List.map tick model.objects }, Cmd.none )
 
-        Click pos ->
-            ( { model | objects = (newObjectAt pos) :: model.objects }, Cmd.none )
-
         DragStart pos ->
             ( { model | dragStart = Just pos }, Cmd.none )
 
         DragEnd pos ->
-            ( { model | dragStart = Nothing }, Cmd.none )
+            if model.mousePosition == model.dragStart then
+                ( { model | objects = (newObjectAt pos) :: model.objects }, Cmd.none )
+            else
+                ( { model | dragStart = Nothing }, Cmd.none )
 
         MouseMove pos ->
             ( { model | mousePosition = Just pos }, Cmd.none )
@@ -155,7 +154,6 @@ view model =
     svg
         [ width "100%"
         , height "100%"
-        , on "click" (mouseEventDecoder (\coords -> Click coords))
         , on "mousedown" (mouseEventDecoder (\coords -> DragStart coords))
         , on "mouseup" (mouseEventDecoder (\coords -> DragEnd coords))
         , on "mousemove" (mouseEventDecoder (\coords -> MouseMove coords))
