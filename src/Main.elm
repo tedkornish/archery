@@ -32,10 +32,15 @@ type alias Model =
 initialModel : Model
 initialModel =
     { objects =
-        [ { pos = { x = 10, y = 10 }
-          , vel = { x = 1, y = 1 }
-          , accel = { x = 0, y = -1 }
-          , dims = { width = 5, height = 8 }
+        [ { pos = { x = 0, y = -300 }
+          , vel = { x = 12, y = -1 }
+          , accel = { x = 0, y = 0.6 }
+          , dims = { width = 50, height = 50 }
+          }
+        , { pos = { x = 0, y = -300 }
+          , vel = { x = 15, y = -1 }
+          , accel = { x = 0, y = 0.6 }
+          , dims = { width = 50, height = 50 }
           }
         ]
     }
@@ -67,7 +72,7 @@ update msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Time.every second Tick
+    Time.every 20 Tick
 
 
 
@@ -77,8 +82,8 @@ subscriptions model =
 viewObjects : Object -> Svg Msg
 viewObjects obj =
     rect
-        [ x (toString (0 + 50))
-        , y (toString (0 + 50))
+        [ x (toString (obj.pos.x + 500)) -- +500 moves towards center
+        , y (toString (obj.pos.y + 500))
         , width (toString obj.dims.width)
         , height (toString obj.dims.height)
         ]
@@ -88,5 +93,5 @@ viewObjects obj =
 view : Model -> Html Msg
 view model =
     svg
-        [ width "100%", height "100%", viewBox "0 0 100 100" ]
+        [ width "100%", height "100%", viewBox "0 0 1000 1000" ]
         (List.map viewObjects model.objects)

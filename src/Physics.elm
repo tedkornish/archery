@@ -16,11 +16,11 @@ type alias Object =
 
 
 type alias Coordinates =
-    { x : Int, y : Int }
+    { x : Float, y : Float }
 
 
 type alias Dimensions =
-    { width : Int, height : Int }
+    { width : Float, height : Float }
 
 
 emptyCoords : Coordinates
