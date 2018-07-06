@@ -9,6 +9,8 @@ import Svg.Attributes exposing (..)
 import Svg.Events exposing (..)
 import Mouse exposing (Position)
 import Events exposing (mouseEventDecoder)
+import Window
+import Task
 
 
 main : Program Never Model Msg
@@ -29,6 +31,7 @@ type alias Model =
     { objects : List Object
     , mousePosition : Position
     , dragStart : Maybe Position
+    , windowSize : Window.Size
     }
 
 
@@ -45,24 +48,16 @@ initialModel : Model
 initialModel =
     { mousePosition = { x = 0, y = 0 }
     , dragStart = Nothing
-    , objects =
-        [ { pos = { x = 0, y = 0 }
-          , vel = { x = 12, y = -1 }
-          , accel = { x = 0, y = 0.6 }
-          , dims = { width = 50, height = 50 }
-          }
-        , { pos = { x = 0, y = 0 }
-          , vel = { x = 15, y = -1 }
-          , accel = { x = 0, y = 0.6 }
-          , dims = { width = 50, height = 50 }
-          }
-        ]
+    , windowSize = { width = 0, height = 0 }
+    , objects = []
     }
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( initialModel, Cmd.none )
+    ( initialModel
+    , Window.size |> Task.perform SetWindowSize
+    )
 
 
 
@@ -74,13 +69,26 @@ type Msg
     | MouseDown Position
     | MouseUp Position
     | MouseMove Position
+    | SetWindowSize Window.Size
+
+
+inBounds : Window.Size -> Object -> Bool
+inBounds size obj =
+    (obj.pos.x > 0)
+        && (obj.pos.y > 0)
+        && (obj.pos.x < (toFloat size.width))
+        && (obj.pos.y < (toFloat size.height))
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Tick _ ->
-            ( { model | objects = List.map tick model.objects }, Cmd.none )
+            let
+                objects =
+                    List.map tick model.objects |> List.filter (inBounds model.windowSize)
+            in
+                ( { model | objects = objects }, Cmd.none )
 
         MouseDown pos ->
             ( { model | dragStart = Just pos }, Cmd.none )
@@ -97,6 +105,9 @@ update msg model =
 
         MouseMove pos ->
             ( { model | mousePosition = pos }, Cmd.none )
+
+        SetWindowSize size ->
+            ( { model | windowSize = size }, Cmd.none )
 
 
 
@@ -127,6 +138,11 @@ viewObjects obj =
 getMousePositionString : Position -> String
 getMousePositionString { x, y } =
     "(" ++ toString x ++ "," ++ toString y ++ ")"
+
+
+getWindowSizeString : Window.Size -> String
+getWindowSizeString { width, height } =
+    toString width ++ "px by " ++ toString height ++ "px"
 
 
 getDragLine : Position -> Maybe Position -> List (Svg.Svg msg)
@@ -163,6 +179,9 @@ view model =
             , [ Svg.text_
                     [ x "20", y "30" ]
                     [ getMousePositionString model.mousePosition |> Svg.text ]
+              , Svg.text_
+                    [ x "20", y "50" ]
+                    [ getWindowSizeString model.windowSize |> Svg.text ]
               ]
             ]
         )
