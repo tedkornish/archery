@@ -96,10 +96,30 @@ update msg model =
         MouseUp pos ->
             let
                 objects =
-                    if (Just model.mousePosition) == model.dragStart then
-                        (newObjectAt pos) :: model.objects
-                    else
-                        model.objects
+                    case model.dragStart of
+                        Just dragStart ->
+                            if dragStart == model.mousePosition then
+                                (newObjectAt pos) :: model.objects
+                            else
+                                let
+                                    delta =
+                                        subtractCoordinates dragStart model.mousePosition
+
+                                    newObjectWithoutVelocity =
+                                        newObjectAt model.mousePosition
+
+                                    newObject =
+                                        { newObjectWithoutVelocity
+                                            | vel =
+                                                { x = (toFloat delta.x) / 4
+                                                , y = (toFloat delta.y) / 4
+                                                }
+                                        }
+                                in
+                                    newObject :: model.objects
+
+                        Nothing ->
+                            model.objects
             in
                 ( { model | dragStart = Nothing, objects = objects }, Cmd.none )
 
@@ -185,3 +205,8 @@ view model =
               ]
             ]
         )
+
+
+subtractCoordinates : Position -> Position -> Position
+subtractCoordinates o1 o2 =
+    { x = o1.x - o2.x, y = o1.y - o2.y }
