@@ -1,6 +1,6 @@
 module Main exposing (..)
 
-import Json.Decode as Decode exposing (Decoder, map2, field)
+import Json.Decode exposing (Decoder)
 import Html exposing (..)
 import Physics exposing (Object, tick)
 import Time exposing (Time, second)
@@ -8,10 +8,7 @@ import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import Svg.Events exposing (..)
 import Mouse exposing (Position)
-
-
---import Html.Attributes exposing (..)
---import Html.Events exposing (onClick)
+import Events exposing (mouseEventDecoder)
 
 
 main : Program Never Model Msg
@@ -67,19 +64,11 @@ init =
 -- UPDATE
 
 
-clickDecoder : Decoder Msg
-clickDecoder =
-    Decode.map
-        (\pos -> Click pos)
-        (map2 Position
-            (field "layerX" Decode.int)
-            (field "layerY" Decode.int)
-        )
-
-
 type Msg
     = Tick Time
     | Click Position
+    | DragStart Position
+    | DragEnd Position
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -89,6 +78,12 @@ update msg model =
             ( { model | objects = List.map tick model.objects }, Cmd.none )
 
         Click pos ->
+            ( { model | objects = (newObjectAt pos) :: model.objects }, Cmd.none )
+
+        DragStart pos ->
+            ( { model | objects = (newObjectAt pos) :: model.objects }, Cmd.none )
+
+        DragEnd pos ->
             ( { model | objects = (newObjectAt pos) :: model.objects }, Cmd.none )
 
 
@@ -122,6 +117,8 @@ view model =
     svg
         [ width "100%"
         , height "100%"
-        , on "click" clickDecoder
+        , on "click" (mouseEventDecoder (\coords -> Click coords))
+        , on "mousedown" (mouseEventDecoder (\coords -> DragStart coords))
+        , on "mouseup" (mouseEventDecoder (\coords -> DragEnd coords))
         ]
         (List.map viewObjects model.objects)
