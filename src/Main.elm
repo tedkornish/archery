@@ -32,12 +32,12 @@ type alias Model =
 initialModel : Model
 initialModel =
     { objects =
-        [ { pos = { x = 0, y = -300 }
+        [ { pos = { x = 0, y = 0 }
           , vel = { x = 12, y = -1 }
           , accel = { x = 0, y = 0.6 }
           , dims = { width = 50, height = 50 }
           }
-        , { pos = { x = 0, y = -300 }
+        , { pos = { x = 0, y = 0 }
           , vel = { x = 15, y = -1 }
           , accel = { x = 0, y = 0.6 }
           , dims = { width = 50, height = 50 }
@@ -82,8 +82,8 @@ subscriptions model =
 viewObjects : Object -> Svg Msg
 viewObjects obj =
     rect
-        [ x (toString (obj.pos.x + 500)) -- +500 moves towards center
-        , y (toString (obj.pos.y + 500))
+        [ x (toString obj.pos.x)
+        , y (toString obj.pos.y)
         , width (toString obj.dims.width)
         , height (toString obj.dims.height)
         ]
