@@ -27,7 +27,7 @@ main =
 
 type alias Model =
     { objects : List Object
-    , mousePosition : Maybe Position
+    , mousePosition : Position
     , dragStart : Maybe Position
     }
 
@@ -43,7 +43,7 @@ newObjectAt pos =
 
 initialModel : Model
 initialModel =
-    { mousePosition = Nothing
+    { mousePosition = { x = 0, y = 0 }
     , dragStart = Nothing
     , objects =
         [ { pos = { x = 0, y = 0 }
@@ -88,7 +88,7 @@ update msg model =
         MouseUp pos ->
             let
                 objects =
-                    if model.mousePosition == model.dragStart then
+                    if (Just model.mousePosition) == model.dragStart then
                         (newObjectAt pos) :: model.objects
                     else
                         model.objects
@@ -96,7 +96,7 @@ update msg model =
                 ( { model | dragStart = Nothing, objects = objects }, Cmd.none )
 
         MouseMove pos ->
-            ( { model | mousePosition = Just pos }, Cmd.none )
+            ( { model | mousePosition = pos }, Cmd.none )
 
 
 
@@ -124,32 +124,27 @@ viewObjects obj =
         []
 
 
-getMousePositionString : Maybe Position -> String
-getMousePositionString pos =
-    case pos of
-        Nothing ->
-            "(none)"
-
-        Just { x, y } ->
-            "(" ++ toString x ++ "," ++ toString y ++ ")"
+getMousePositionString : Position -> String
+getMousePositionString { x, y } =
+    "(" ++ toString x ++ "," ++ toString y ++ ")"
 
 
-getDragLine : Maybe Position -> Maybe Position -> List (Svg.Svg msg)
-getDragLine pos1 pos2 =
-    case ( pos1, pos2 ) of
-        ( Just p1, Just p2 ) ->
+getDragLine : Position -> Maybe Position -> List (Svg.Svg msg)
+getDragLine current maybeOrigin =
+    case maybeOrigin of
+        Just origin ->
             [ line
-                [ x1 (toString p1.x)
-                , y1 (toString p1.y)
-                , x2 (toString p2.x)
-                , y2 (toString p2.y)
+                [ x1 (toString origin.x)
+                , y1 (toString origin.y)
+                , x2 (toString current.x)
+                , y2 (toString current.y)
                 , strokeWidth "1"
                 , stroke "black"
                 ]
                 []
             ]
 
-        _ ->
+        Nothing ->
             []
 
 
