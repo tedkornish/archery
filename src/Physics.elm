@@ -8,11 +8,19 @@ module Physics
 
 
 type alias Object =
-    { pos : Coordinates, vel : Coordinates, accel : Coordinates }
+    { pos : Coordinates
+    , vel : Coordinates
+    , accel : Coordinates
+    , dims : Dimensions
+    }
 
 
 type alias Coordinates =
     { x : Int, y : Int }
+
+
+type alias Dimensions =
+    { width : Int, height : Int }
 
 
 emptyCoords : Coordinates
@@ -20,9 +28,9 @@ emptyCoords =
     { x = 0, y = 0 }
 
 
-stillObject : Coordinates -> Object
-stillObject startingCoords =
-    { pos = startingCoords, vel = emptyCoords, accel = emptyCoords }
+stillObject : Coordinates -> Dimensions -> Object
+stillObject startingCoords dims =
+    { pos = startingCoords, vel = emptyCoords, accel = emptyCoords, dims = dims }
 
 
 tick : Object -> Object
