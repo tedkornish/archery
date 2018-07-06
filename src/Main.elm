@@ -35,8 +35,8 @@ type alias Model =
 newObjectAt : Position -> Object
 newObjectAt pos =
     { pos = { x = toFloat pos.x, y = toFloat pos.y }
-    , vel = { x = 12, y = -1 }
-    , accel = { x = 0, y = 0.6 }
+    , vel = { x = 0, y = 0 }
+    , accel = { x = 0, y = 0.6 } -- gravity
     , dims = { width = 50, height = 50 }
     }
 
