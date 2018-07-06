@@ -11,6 +11,7 @@ import Mouse exposing (Position)
 import Events exposing (mouseEventDecoder)
 import Window
 import Task
+import VirtualDom exposing (attribute)
 
 
 main : Program Never Model Msg
@@ -177,10 +178,10 @@ view model =
             [ (List.map viewObjects model.objects)
             , getDragLine model.mousePosition model.dragStart
             , [ Svg.text_
-                    [ x "20", y "30" ]
+                    [ x "20", y "30", attribute "unselectable" "on" ]
                     [ getMousePositionString model.mousePosition |> Svg.text ]
               , Svg.text_
-                    [ x "20", y "50" ]
+                    [ x "20", y "50", attribute "unselectable" "on" ]
                     [ getWindowSizeString model.windowSize |> Svg.text ]
               ]
             ]
