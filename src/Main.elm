@@ -26,7 +26,10 @@ main =
 
 
 type alias Model =
-    { objects : List Object, mousePosition : Maybe Position }
+    { objects : List Object
+    , mousePosition : Maybe Position
+    , dragStart : Maybe Position
+    }
 
 
 newObjectAt : Position -> Object
@@ -41,6 +44,7 @@ newObjectAt pos =
 initialModel : Model
 initialModel =
     { mousePosition = Nothing
+    , dragStart = Nothing
     , objects =
         [ { pos = { x = 0, y = 0 }
           , vel = { x = 12, y = -1 }
@@ -83,10 +87,10 @@ update msg model =
             ( { model | objects = (newObjectAt pos) :: model.objects }, Cmd.none )
 
         DragStart pos ->
-            ( { model | objects = (newObjectAt pos) :: model.objects }, Cmd.none )
+            ( { model | dragStart = Just pos }, Cmd.none )
 
         DragEnd pos ->
-            ( { model | objects = (newObjectAt pos) :: model.objects }, Cmd.none )
+            ( { model | dragStart = Nothing }, Cmd.none )
 
         MouseMove pos ->
             ( { model | mousePosition = Just pos }, Cmd.none )
@@ -127,6 +131,25 @@ getMousePositionString pos =
             "(" ++ toString x ++ "," ++ toString y ++ ")"
 
 
+getDragLine : Maybe Position -> Maybe Position -> List (Svg.Svg msg)
+getDragLine pos1 pos2 =
+    case ( pos1, pos2 ) of
+        ( Just p1, Just p2 ) ->
+            [ line
+                [ x1 (toString p1.x)
+                , y1 (toString p1.y)
+                , x2 (toString p2.x)
+                , y2 (toString p2.y)
+                , strokeWidth "1"
+                , stroke "black"
+                ]
+                []
+            ]
+
+        _ ->
+            []
+
+
 view : Model -> Html Msg
 view model =
     svg
@@ -137,10 +160,12 @@ view model =
         , on "mouseup" (mouseEventDecoder (\coords -> DragEnd coords))
         , on "mousemove" (mouseEventDecoder (\coords -> MouseMove coords))
         ]
-        (List.append
-            (List.map viewObjects model.objects)
-            [ Svg.text_
-                [ x "20", y "30" ]
-                [ getMousePositionString model.mousePosition |> Svg.text ]
+        (List.concat
+            [ (List.map viewObjects model.objects)
+            , getDragLine model.mousePosition model.dragStart
+            , [ Svg.text_
+                    [ x "20", y "30" ]
+                    [ getMousePositionString model.mousePosition |> Svg.text ]
+              ]
             ]
         )
